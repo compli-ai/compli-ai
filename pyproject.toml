@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "compli-ai"
-version = "0.1.0"
+version = "0.1.1"
 description = "Auto-generate EU AI Act technical documentation from your code."
 authors = ["Compli-AI Team <contact@example.com>"]
 readme = "README.md"

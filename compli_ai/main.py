@@ -1,4 +1,5 @@
 import os
+import json
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -13,16 +14,29 @@ app = typer.Typer()
 console = Console()
 
 @app.command()
-def scan(path: str = typer.Argument(".", help="Directory to scan"), output: Optional[str] = typer.Option(None, "--output", "-o", help="Filename to save the compliance report (e.g., report.md).")):
+def scan(
+    path: str = typer.Argument(".", help="Directory to scan"),
+    output: Optional[str] = typer.Option(
+        None, "--output", "-o", help="Filename to save the compliance report (e.g., report.md)."
+    ),
+    json_mode: bool = typer.Option(
+        False, "--json", help="Output results as JSON for machine parsing"
+    ),
+):
     """
     Scans the directory for AI compliance data.
     """
+    global console
     scan_path = Path(path)
-    if not scan_path.exists():
+    if not scan_path.exists() and not json_mode:
         console.print(f"[red]Error: Path '{path}' does not exist.[/red]")
         raise typer.Exit(code=1)
 
-    console.print(f"[green]Scanning directory:[/green] {scan_path.resolve()}...")
+    if not json_mode and not console.is_terminal:
+        console = Console(force_terminal=False)
+
+    if not json_mode:
+        console.print(f"[green]Scanning directory:[/green] {scan_path.resolve()}...")
 
     all_libraries = set()
     all_models: list[tuple[Path, ModelInfo]] = []
@@ -33,13 +47,33 @@ def scan(path: str = typer.Argument(".", help="Directory to scan"), output: Opti
             if file.endswith(".py"):
                 py_files_count += 1
                 file_path = Path(root) / file
-                
+
                 libs = analyze_imports(str(file_path))
                 all_libraries.update(libs)
-                
+
                 models = detect_models(str(file_path))
                 for model in models:
                     all_models.append((file_path, model))
+
+    if json_mode:
+        results = {
+            "timestamp": datetime.now().isoformat(),
+            "files_scanned": py_files_count,
+            "dependencies": [
+                {"name": lib, "risk": "unknown"} for lib in sorted(list(all_libraries))
+            ],
+            "models": [
+                {
+                    "file": str(file_path.relative_to(scan_path) if file_path.is_relative_to(scan_path) else file_path),
+                    "line": model.line_number,
+                    "model_name": model.name,
+                    "framework": model.framework,
+                }
+                for file_path, model in all_models
+            ],
+        }
+        print(json.dumps(results, indent=2))
+        return
 
     console.print(f"Scan complete. Found {py_files_count} Python file(s).")
     console.print()
@@ -53,7 +87,7 @@ def scan(path: str = typer.Argument(".", help="Directory to scan"), output: Opti
         console.print(lib_table)
     else:
         console.print("[yellow]No Python libraries detected.[/yellow]")
-    
+
     console.print()
 
     # Display Models Table
@@ -63,14 +97,18 @@ def scan(path: str = typer.Argument(".", help="Directory to scan"), output: Opti
         model_table.add_column("Line", style="magenta")
         model_table.add_column("Model Name/Class", style="cyan")
         model_table.add_column("Framework", style="green")
-        
+
         for file_path, model in all_models:
-            relative_path = file_path.relative_to(scan_path) if file_path.is_relative_to(scan_path) else file_path
+            relative_path = (
+                file_path.relative_to(scan_path)
+                if file_path.is_relative_to(scan_path)
+                else file_path
+            )
             model_table.add_row(
                 str(relative_path),
                 str(model.line_number),
                 model.name,
-                model.framework
+                model.framework,
             )
         console.print(model_table)
     else:
@@ -78,7 +116,9 @@ def scan(path: str = typer.Argument(".", help="Directory to scan"), output: Opti
 
     # Generate and save report if output path is provided
     if output:
-        report_content = generate_markdown_report(all_models, all_libraries, scan_path)
+        report_content = generate_markdown_report(
+            all_models, all_libraries, scan_path
+        )
         try:
             with open(output, "w", encoding="utf-8") as f:
                 f.write(report_content)
