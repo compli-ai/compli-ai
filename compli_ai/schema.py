@@ -55,8 +55,8 @@ class ProjectMeta(BaseModel):
 class Policy(BaseModel):
     """Pydantic model for the compliance policy."""
     intended_purpose: str = Field(
-        "Placeholder: Describe the intended purpose of the AI system.",
-        description="The specific goal and application of the AI system."
+        "DESCRIBE_INTENDED_PURPOSE_HERE",
+        description="A clear, specific description of the system's intended use."
     )
     risk_category: RiskCategory = Field(
         RiskCategory.MINIMAL,
@@ -82,4 +82,3 @@ class ComplianceReport(BaseModel):
     policy: Policy = Field(..., description="The compliance policy for the AI system.")
     system: System = Field(..., description="The technical components of the AI system.")
     data: Data = Field(..., description="Information about the data used by the system.")
-

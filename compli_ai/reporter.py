@@ -83,6 +83,7 @@ def render_tables(result: ScanResult, console: Console, scan_path: Path) -> None
         error_table.add_column("Error", style="red")
         for err in result.errors:
             error_table.add_row(str(err.file_path.relative_to(scan_path)), err.error)
+        console.print(error_table)
 
 def generate_markdown_report(result: ScanResult, scan_path: Path) -> str:
     """Generates a Markdown formatted report string."""

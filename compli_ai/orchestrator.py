@@ -85,7 +85,7 @@ def add_comments_to_yaml(yaml_string: str) -> str:
         elif "risk_category:" in line:
             commented_lines.append("  # Risk Category (EU AI Act, Title III): The assessed risk level. Options: prohibited, high_risk, limited_risk, minimal_risk")
         elif "system:" in line:
-            commented_lines.append("\n# The technical components of the AI system, auto-detected from the codebase.")
+            commented_lines.append("\nThe technical components of the AI system, auto-detected from the codebase.")
         elif "data:" in line:
             commented_lines.append("\n# Information about the data used by the system.")
         commented_lines.append(line)

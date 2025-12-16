@@ -2,9 +2,9 @@
 name = "compli-ai"
 version = "0.2.0"
 description = "Auto-generate EU AI Act technical documentation from your code."
-authors = ["Compli-AI Team <contact@example.com>"]
+authors = ["Compli-AI Team <contact@compli-ai.org>"]
 readme = "README.md"
-repository = "https://github.com/yourusername/compli-ai"
+repository = "https://github.com/compli-ai/compli-ai"
 packages = [{include = "compli_ai"}]
 
 [tool.poetry.dependencies]

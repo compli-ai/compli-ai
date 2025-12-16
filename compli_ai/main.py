@@ -32,7 +32,7 @@ def init(
         raise typer.Exit(code=1)
 
     try:
-        console.print(f"Scanning '{scan_path}' to auto-populate system components...")
+        console.print(f"Scanning '{scan_path.name}' to auto-populate system components...")
         yaml_content = orchestrator.generate_compliance_file(scan_path)
         
         with open(file_path, "w", encoding="utf-8") as f:
@@ -88,7 +88,7 @@ def version():
     """
     Prints the current version of Compli-AI.
     """
-    console.print("[bold green]Compli-AI Version 0.1.0[/bold green]")
+    console.print("[bold green]Compli-AI Version 0.2.0[/bold green]")
 
 if __name__ == "__main__":
     app()

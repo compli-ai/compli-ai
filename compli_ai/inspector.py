@@ -66,7 +66,7 @@ def detect_models(content: str, file_path: Path) -> List[ModelInfo]:
     Detects AI models in Python code content.
     """
     models = []
-    tree = ast.parse(content, filename=file_path)
+    tree = ast.parse(content, filename=str(file_path))
 
     for node in ast.walk(tree):
         # Detect Hugging Face models: x = AutoModel.from_pretrained('name') or pipeline(..., model='name')
